@@ -3,20 +3,15 @@ package Principal;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -49,37 +44,8 @@ public class MainFrame extends JFrame {
 	public MainFrame() {
 		negocio = new Negocio();
 		
-		Toolkit t= Toolkit.getDefaultToolkit();
-		
-		//System.out.println("src "+this.getClass().getResource("explosion.png"));
-		//Image img = t.getImage(this.getClass().getResource("//img//explosion.png"));
-		//System.out.println("imagen expl " + img);
-		//this.getGraphics().drawImage(img,y*casAncho, x*casAlto,casAncho,casAlto, this);
-		/*JFrame f = new JFrame("Testing load resource from jar");
-		
-		BufferedImage buff = null;
-	    try {
-	        buff = ImageIO.read(getClass().getResourceAsStream("icon.jpg"));
-	    } catch (IOException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
-	    }
+		this.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.jpg"));
 
-	    f.setIconImage(buff);*/
-		/*try {
-		    Image bg = ImageIO.read(getClass().getResource("C:/Users/Alberto/Desktop/TODO/DerechoJava/Encuestas/icon.jpg"));
-		    ImagePanel imgP = new ImagePanel();
-		    imgP.setImage(bg);
-		    f.setContentPane(imgP);
-		} catch (IOException e) {
-		    e.printStackTrace();
-		}*/
-		//new javax.swing.ImageIcon(getClass().getResource("icon.jpg"));		
-		//Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("/icon.jpg"));
-		//this.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.jpg"));
-		//URL url = getClass().getResource("icon.jpeg");
-		//this.setIconImage(Toolkit.getDefaultToolkit().getImage(this.getClass().getResource("icon.jpg")));
-		
 		this.setResizable(false);
 		this.setTitle(Constantes.TEXTO_VENTANA);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -119,13 +85,13 @@ public class MainFrame extends JFrame {
 		lblImg.setBounds(0, 0, 717, 87);
 		this.add(lblImg);
 
-		//ImageIcon imgThisImg = new ImageIcon("encabezado.jpg");
-		//lblImg.setIcon(imgThisImg);
-		System.out.println(this.getClass().getResource("encabezado.jpg"));
-		Image img = t.getImage(this.getClass().getResource("encabezado.jpg"));
+		ImageIcon imgThisImg = new ImageIcon("encabezado.jpg");
+		lblImg.setIcon(imgThisImg);
+		//System.out.println(this.getClass().getResource("encabezado.jpg"));
+		//Image img = t.getImage("encabezado.jpg");
 		//System.out.println("imagen expl " + img);
-		System.out.println(this.getGraphics());
-		this.getGraphics().drawImage(img,0, 0, 717, 87, this);
+		//System.out.println(this.getGraphics());
+		//this.getGraphics().drawImage(img,0, 0, 717, 87, this);
 
 		JTextArea txtDias = new JTextArea();
 		txtDias.setText(Constantes.TEXTO_JTXT_DIAS);

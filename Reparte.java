@@ -7,107 +7,68 @@ public class Reparte {
 	private ArrayList<Solicitud> fechasP1;
 	private ArrayList<Solicitud> fechasP2;
 	private ArrayList<Solicitud> fechasP3;
-	private Hashtable<String,Boolean> tabla;
-	
-	private Boolean[] franjasOcupadas;
+	private ArrayList<Solicitud> solicitudesRepetidas,solicitudesSinAsignar,solicitudesAsignadas;
+	private Solicitud[][] tablaSalidaExcel;
+	private int numEncuestasAsignadas;
+	private Hashtable<String, Boolean> asignada;
+
 	private double[] castHorasDouble;
 	private ArrayList<Pair<Integer,Integer>> castSemanasSplit;
-	
-	private Hashtable<String,Solicitud> tablaSalida = new Hashtable<String,Solicitud>();
+
 	
 	public Reparte(ArrayList<Solicitud> fP1, ArrayList<Solicitud> fP2, ArrayList<Solicitud> fP3,Hashtable<String,Boolean> t,
 			double[] castHorasDouble,ArrayList<Pair<Integer,Integer>> castSemanasSplit){
 		this.castSemanasSplit = castSemanasSplit;
 		this.castHorasDouble = castHorasDouble;
-		fechasP1 = fP1;
-		fechasP2 = fP2;
-		fechasP3 = fP3;
-		tabla = t;
-
-		franjasOcupadas = new Boolean[castHorasDouble.length*castSemanasSplit.size()];
-		
-		for(int i = 0; i < franjasOcupadas.length; i++){
-			franjasOcupadas[i] = false;
-		}
-		
+		this.fechasP1 = fP1;
+		this.fechasP2 = fP2;
+		this.fechasP3 = fP3;
+		this.asignada = t;
+		this.solicitudesRepetidas = new ArrayList<Solicitud>();
+		this.solicitudesSinAsignar = new ArrayList<Solicitud>();
+		this.solicitudesAsignadas = new ArrayList<Solicitud>();
+		this.numEncuestasAsignadas = 0;
+		this.tablaSalidaExcel = new Solicitud[castHorasDouble.length][castSemanasSplit.size()];				
 	}
-	
+
 	public int start(){
 		try{
 			recorrerLista(fechasP1);			
 			recorrerLista(fechasP2);
 			recorrerLista(fechasP3);
-			/*for (String key : tabla.keySet()) {
-			    System.out.println(key + ":" + tabla.get(key));
-			}
-			
-			System.out.println("__________________________________________________________");*/
+
 			return 0;
 		} catch(Exception e){
 			return -3;
 		}
 	}
 	
-	private void recorrerLista(ArrayList<Solicitud> fechas){
-		int modificaciones = 0;
-		Solicitud actual, elegida;
-		ArrayList<Solicitud> aux;
-		Boolean stop;
-		
-		while(!fechas.isEmpty() && modificaciones==0){
-			modificaciones = 1;
-			for(int i = 0; i < fechas.size(); i++){			
-				actual = fechas.get(i);
-				if(!tabla.get(actual.clave()) || franjasOcupadas[hashFranjaHoraria(actual)]){
-					fechas.remove(i);
-					modificaciones = 0;
-					i--;
-				}else{	
-					
-					aux = new ArrayList<Solicitud>();
-					aux.add(actual);
-					stop = false;
-					for(int j = i+1; j < fechas.size() && !stop;j++){
-						if(actual.esIgualQue(fechas.get(j))){
-							aux.add(fechas.get(j));
-						}else{
-							stop = true;
-						}
-					}
-								
-					
-					elegida = new Solicitud();
-					if(aux.size()==1){
-						elegida = aux.get(0);
-					}else{
-						int ordenDeRespuesta = Integer.MAX_VALUE;
-						for(int j = 0; j < aux.size();j++){
-							if(aux.get(j).getNumLinea() < ordenDeRespuesta){
-								elegida = aux.get(j);
-								ordenDeRespuesta = elegida.getNumLinea();
-							}
-						}		
-					}
+	public Hashtable<String, Boolean> getAsignada() {
+		return asignada;
+	}
 
-					tabla.put(elegida.clave(), false);
-					tablaSalida.put(elegida.clave(),elegida);
-					franjasOcupadas[hashFranjaHoraria(elegida)] = true;
-					
-					//System.out.println("SOLICITUD " + elegida.getNumOpcion() + " LINEA " + elegida.getNumLinea());
-					
-					for(int x = i; x < aux.size(); x++){
-						fechas.remove(i);
+	private void recorrerLista(ArrayList<Solicitud> fechas){
+		for(int i = 0; i < fechas.size(); i++){
+			Solicitud aux =  fechas.get(i);
+			if(asignada.get(aux.clave())){
+				Pair<Integer,Integer> hash = hashFranjaHorariaDoble(aux);
+				if(tablaSalidaExcel[hash.getLeft()][hash.getRight()] == null){
+					tablaSalidaExcel[hash.getLeft()][hash.getRight()] = aux;
+					numEncuestasAsignadas++;
+					solicitudesAsignadas.add(aux);
+					asignada.replace(aux.clave(),false);
+				}else{
+					if(aux.esIgualClave(tablaSalidaExcel[hash.getLeft()][hash.getRight()])){
+						solicitudesRepetidas.add(aux);
+					} else {
+						solicitudesSinAsignar.add(aux);
 					}
-					
-					modificaciones = 0;
-					i--;
-					
 				}
 			}
 		}
 	}
-	
-	private int hashFranjaHoraria(Solicitud s){
+
+	private Pair<Integer,Integer> hashFranjaHorariaDoble(Solicitud s){
 		int dia = s.getDia();
 		double hora = s.getHora();
 		int posDia = 0,posHora = 0;
@@ -126,28 +87,27 @@ public class Reparte {
 				posDia = i;
 			}
 		}
-		
-		if(posHora==0)
-			return posDia*castHorasDouble.length;
-		if(posDia==0)
-			return posHora;
-		
-		return (posDia*castHorasDouble.length)+posHora;
-	}
-
-	public ArrayList<Solicitud> getFechasP1() {
-		return new ArrayList<Solicitud>(fechasP1);
+			
+		return new Pair<Integer,Integer>(posHora,posDia);
 	}
 	
-	public ArrayList<Solicitud> getFechasP2() {
-		return new ArrayList<Solicitud>(fechasP2);
+	public ArrayList<Solicitud> getSolicitudesRepetidas() {
+		return solicitudesRepetidas;
 	}
 	
-	public ArrayList<Solicitud> getFechasP3() {
-		return new ArrayList<Solicitud>(fechasP3);
+	public ArrayList<Solicitud> getSolicitudesAsignadas() {
+		return new ArrayList<Solicitud>(solicitudesAsignadas);
+	}
+	
+	public ArrayList<Solicitud> getSolicitudesSinAsignar() {
+		return new ArrayList<Solicitud>(solicitudesSinAsignar);
 	}
 
-	public Hashtable<String,Solicitud> salida(){
-		return new Hashtable<String,Solicitud>(tablaSalida);
+	public Solicitud[][] getTablaSalidaExcel() {
+		return tablaSalidaExcel;
+	}
+		
+	public int getNumEncuestasAsignadas() {
+		return numEncuestasAsignadas;
 	}
 }
