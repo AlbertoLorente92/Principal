@@ -7,7 +7,7 @@ public class Reparte {
 	private ArrayList<Solicitud> fechasP1;
 	private ArrayList<Solicitud> fechasP2;
 	private ArrayList<Solicitud> fechasP3;
-	private ArrayList<Solicitud> solicitudesRepetidas,solicitudesSinAsignar;
+	private ArrayList<Solicitud> solicitudesRepetidas,solicitudesSinAsignar,solicitudesAsignadas;
 	private Solicitud[][] tablaSalidaExcel;
 	private int numEncuestasAsignadas;
 	private Hashtable<String, Boolean> asignada;
@@ -26,6 +26,7 @@ public class Reparte {
 		this.asignada = t;
 		this.solicitudesRepetidas = new ArrayList<Solicitud>();
 		this.solicitudesSinAsignar = new ArrayList<Solicitud>();
+		this.solicitudesAsignadas = new ArrayList<Solicitud>();
 		this.numEncuestasAsignadas = 0;
 		this.tablaSalidaExcel = new Solicitud[castHorasDouble.length][castSemanasSplit.size()];				
 	}
@@ -35,34 +36,34 @@ public class Reparte {
 			recorrerLista(fechasP1);			
 			recorrerLista(fechasP2);
 			recorrerLista(fechasP3);
-			
-			for(int i = 0; i < solicitudesRepetidas.size(); i++){
-				System.out.println(solicitudesRepetidas.get(i).toString());
-			}
+
 			return 0;
 		} catch(Exception e){
 			return -3;
 		}
 	}
 	
+	public Hashtable<String, Boolean> getAsignada() {
+		return asignada;
+	}
+
 	private void recorrerLista(ArrayList<Solicitud> fechas){
-		for(int i = 0; i < fechas.size(); i++){	
+		for(int i = 0; i < fechas.size(); i++){
 			Solicitud aux =  fechas.get(i);
 			if(asignada.get(aux.clave())){
 				Pair<Integer,Integer> hash = hashFranjaHorariaDoble(aux);
 				if(tablaSalidaExcel[hash.getLeft()][hash.getRight()] == null){
 					tablaSalidaExcel[hash.getLeft()][hash.getRight()] = aux;
 					numEncuestasAsignadas++;
+					solicitudesAsignadas.add(aux);
 					asignada.replace(aux.clave(),false);
 				}else{
-					if(aux.esIgualQue(tablaSalidaExcel[hash.getLeft()][hash.getRight()])){
+					if(aux.esIgualClave(tablaSalidaExcel[hash.getLeft()][hash.getRight()])){
 						solicitudesRepetidas.add(aux);
 					} else {
 						solicitudesSinAsignar.add(aux);
 					}
 				}
-			}else{
-				
 			}
 		}
 	}
@@ -91,9 +92,13 @@ public class Reparte {
 	}
 	
 	public ArrayList<Solicitud> getSolicitudesRepetidas() {
-		return new ArrayList<Solicitud>(solicitudesRepetidas);
+		return solicitudesRepetidas;
 	}
-
+	
+	public ArrayList<Solicitud> getSolicitudesAsignadas() {
+		return new ArrayList<Solicitud>(solicitudesAsignadas);
+	}
+	
 	public ArrayList<Solicitud> getSolicitudesSinAsignar() {
 		return new ArrayList<Solicitud>(solicitudesSinAsignar);
 	}

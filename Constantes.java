@@ -25,7 +25,7 @@ public class Constantes {
 	public static String TEXTO_SALIDA_ERROR_5 = "Error escribiendo los ficcheros de solicitudes\nERR5";
 	public static String TEXTO_SALIDA_ERROR_6 = "Error escribiendo el horario en excel\nERR6";
 	public static String TEXTO_SALIDA_ERROR_10 = "Error en la asignacion\nERR10";
-	public static String[] ficheros = {"solicitudesIncompletas.txt","solicitudesErroneas.txt","solicitudesRepetidas.txt"};
+	public static String[] ficheros = {"solicitudesIncompletas.txt","solicitudesErroneas.txt"};
 	
 	
 	
