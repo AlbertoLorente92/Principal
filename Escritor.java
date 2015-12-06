@@ -15,37 +15,19 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Escritor {
-	/**
-	 * solicitudes[0] => Incompletas solicitudes[1] => Erroneas solicitudes[2]
-	 * => Repetidas
-	 */
-	//private ArrayList<ArrayList<Solicitud>> solicitudes = new ArrayList<ArrayList<Solicitud>>();
+
 	private ArrayList<Solicitud> solicitudesIncompletas = new ArrayList<Solicitud>();
 	
 	private ArrayList<Solicitud> solicitudesIncorrectasP1 = new ArrayList<Solicitud>();
 	private ArrayList<Solicitud> solicitudesIncorrectasP2 = new ArrayList<Solicitud>();
 	private ArrayList<Solicitud> solicitudesIncorrectasP3 = new ArrayList<Solicitud>();
-	
-	private ArrayList<Solicitud> solicitudesRepetidasP1 = new ArrayList<Solicitud>();
-	private ArrayList<Solicitud> solicitudesRepetidasP2 = new ArrayList<Solicitud>();
-	private ArrayList<Solicitud> solicitudesRepetidasP3 = new ArrayList<Solicitud>();
-	/**
-	 * ficheros[0] => Incompletas ficheros[1] => Erroneas ficheros[2] =>
-	 * Repetidas
-	 */
-	private String[] ficheros = new String[3];
 
+	private String[] ficheros = new String[2];
 	public Escritor() {
-		for (int i = 0; i < 3; i++) {
-			//solicitudes.add(i, new ArrayList<Solicitud>());
+		for (int i = 0; i < 2; i++) {
 			ficheros[i] = "";
 		}
 	}
-
-	/*public void setSolicitudes(ArrayList<ArrayList<Solicitud>> s, String[] f) {
-		solicitudes = s;
-		ficheros = f;
-	}*/
 
 	/**
 	 * I = 0
@@ -71,19 +53,6 @@ public class Escritor {
 		ficheros[1] = f;
 	}
 
-	/**
-	 * I = 2
-	 * 
-	 * @param s
-	 * @param f
-	 */
-	public void setSolicitudesRepetidas(ArrayList<Solicitud> sP1,ArrayList<Solicitud> sP2,ArrayList<Solicitud> sP3, String f) {
-		solicitudesRepetidasP1 = sP1;
-		solicitudesRepetidasP2 = sP2;
-		solicitudesRepetidasP3 = sP3;
-		ficheros[2] = f;
-	}
-
 	public int escribir() {
 		try{  	
     		File file; 
@@ -102,9 +71,6 @@ public class Escritor {
 			escribeAux(true,1,solicitudesIncorrectasP2);
 			escribeAux(true,1,solicitudesIncorrectasP3);
 			
-			escribeAux(false,2,solicitudesRepetidasP1);
-			escribeAux(false,2,solicitudesRepetidasP2);
-			escribeAux(false,2,solicitudesRepetidasP3);
 			return 0;
 		}catch(Exception e){
 			return -5;
