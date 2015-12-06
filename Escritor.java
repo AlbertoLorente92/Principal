@@ -112,7 +112,7 @@ public class Escritor {
 		
 	}
 	
-	public void EscritorExcel(ArrayList<Solicitud> prueba,double[] castHorasDouble,ArrayList<Pair<Integer,Integer>> castSemanasSplit,String fichero) {
+	public void EscritorExcel(Solicitud[][] salidaExcel,double[] castHorasDouble,ArrayList<Pair<Integer,Integer>> castSemanasSplit,String fichero) {
 		try{    		
     		File file = new File(fichero); 	
     		file.delete();   
@@ -141,14 +141,17 @@ public class Escritor {
 			datos[i][0] = aux;
 		}
 		
-		for(int j = 1; j < castHorasDouble.length+1; j++){
-			for(int i = 1; i < castSemanasSplit.size()+1; i++){	
-				if(!prueba.isEmpty() && prueba.get(0).getDia() == castSemanasSplit.get(i-1).getLeft() &&
-					prueba.get(0).getHora() == castHorasDouble[j-1]){
-					datos[j][i] = prueba.get(0).claveProfesor();
-					prueba.remove(0);
+		for(int i = 1; i < castHorasDouble.length+1; i++){
+			for(int j = 1; j < castSemanasSplit.size()+1; j++){
+				if(salidaExcel[i-1][j-1] != null){
+					if(!salidaExcel[i-1][j-1].isEmpty() && salidaExcel[i-1][j-1].getDia() == castSemanasSplit.get(j-1).getLeft() &&
+							salidaExcel[i-1][j-1].getHora() == castHorasDouble[i-1]){
+						datos[i][j] = salidaExcel[i-1][j-1].claveProfesor();
+					}else{
+						datos[i][j] = "";
+					}
 				}else{
-					datos[j][i] = "";
+					datos[i][j] = "";
 				}
 			}
 		}
