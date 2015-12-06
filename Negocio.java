@@ -17,7 +17,6 @@ public class Negocio {
 	public Negocio() {
 		ficheroSalida = "HorarioEncuestas.xlsx";
 		boolHoras = boolDias = false;
-		cambios = new Hashtable<String, Integer>();
 	}
 	
 	/**
@@ -117,7 +116,9 @@ public class Negocio {
 			if(lectorCodigo==Constantes.ERR_2){
 				return new Triplet<Pair<Boolean, String>, Pair<Boolean, String>,Integer>(new Pair<Boolean, String>(false,""), new Pair<Boolean, String>(false,""),Constantes.ERR_2);
 			}
-						
+			
+			//System.out.println(lector.getClaves().size());
+			
 			Escritor escritor = new Escritor();
 			ArrayList<Solicitud> listaPrioridad1 = lector.getSolicitudesPrioridad1();
 			ArrayList<Solicitud> listaPrioridad2 = lector.getSolicitudesPrioridad2();
@@ -125,13 +126,14 @@ public class Negocio {
 			
 			escritor.setSolicitudesIncompletas(lector.getSolicitudesIncompletas(), Constantes.ficheros[0]);
 			
-			
+			cambios = new Hashtable<String, Integer>();
 			
 			Pair<ArrayList<Solicitud>,ArrayList<Solicitud>> solicitudesCorrectasPrioridad1 = eliminarSolicitudesIncorrectas(listaPrioridad1);
 			Pair<ArrayList<Solicitud>,ArrayList<Solicitud>> solicitudesCorrectasPrioridad2 = eliminarSolicitudesIncorrectas(listaPrioridad2);	
 			Pair<ArrayList<Solicitud>,ArrayList<Solicitud>> solicitudesCorrectasPrioridad3 = eliminarSolicitudesIncorrectas(listaPrioridad3);	
 			
-			Hashtable<String, Boolean> t = lector.getClaves();	
+			Hashtable<String, Boolean> t = lector.getClaves();
+			
 			for (String key : cambios.keySet()) {
 				if(cambios.get(key)==3){
 					t.remove(key);					
@@ -144,36 +146,71 @@ public class Negocio {
 			ArrayList<Solicitud> sCorrectasP2 = solicitudesCorrectasPrioridad2.getLeft();
 			ArrayList<Solicitud> sCorrectasP3 = solicitudesCorrectasPrioridad3.getLeft();
 			
-			Reparte p = new Reparte(sCorrectasP1,sCorrectasP2,sCorrectasP3, t, castHorasDouble, castSemanasSplit);
+			FechasOrdenadas fechasOrdP1 = new FechasOrdenadas(sCorrectasP1, castSemanasSplit);
+			FechasOrdenadas fechasOrdP2 = new FechasOrdenadas(sCorrectasP2, castSemanasSplit);
+			FechasOrdenadas fechasOrdP3 = new FechasOrdenadas(sCorrectasP3, castSemanasSplit);
+	
+			solicitudesCorrectasPrioridad1 = eliminarSolicitudesRepetidas(fechasOrdP1.list());
+			solicitudesCorrectasPrioridad2 = eliminarSolicitudesRepetidas(fechasOrdP2.list());
+			solicitudesCorrectasPrioridad3 = eliminarSolicitudesRepetidas(fechasOrdP3.list());
+
+			escritor.setSolicitudesRepetidas(solicitudesCorrectasPrioridad1.getRight(), solicitudesCorrectasPrioridad2.getRight(),solicitudesCorrectasPrioridad3.getRight(),Constantes.ficheros[2]);
+			
+			int escritorCodigotxt = escritor.escribir();
+			if(escritorCodigotxt==Constantes.ERR_5){
+				return new Triplet<Pair<Boolean, String>, Pair<Boolean, String>,Integer>(new Pair<Boolean, String>(false,""), new Pair<Boolean, String>(false,""),Constantes.ERR_5);
+			}
+			
+			numSolicitudes = solicitudesCorrectasPrioridad1.getLeft().size() + solicitudesCorrectasPrioridad2.getLeft().size() +solicitudesCorrectasPrioridad3.getLeft().size();
+			Reparte p = new Reparte(solicitudesCorrectasPrioridad1.getLeft(),solicitudesCorrectasPrioridad2.getLeft(),solicitudesCorrectasPrioridad3.getLeft(), t, castHorasDouble, castSemanasSplit);
 			
 			int reparteCodigo = p.start();
+
 			if(reparteCodigo==Constantes.ERR_3){
 				return new Triplet<Pair<Boolean, String>, Pair<Boolean, String>,Integer>(new Pair<Boolean, String>(false,""), new Pair<Boolean, String>(false,""),Constantes.ERR_3);
 			}
 			
-			this.numSolicitudes = sCorrectasP1.size() + sCorrectasP2.size() + sCorrectasP3.size() - p.getSolicitudesRepetidas().size();
-			this.numEncuestasAsignadas = p.getNumEncuestasAsignadas();		
-			this.numEncuestasSinAsignar = 0;
-			String salidaError = "";			
-			Hashtable<String, Boolean> sinAsignar = p.getAsignada();
+			Hashtable<String, Solicitud> tablaSalida = p.salida();
+			
+			
+			//System.out.println(tablaSalida);
+			
+			
+			numEncuestasSinAsignar = 0;
+			
 			Hashtable<String,Triplet<Solicitud, Solicitud, Solicitud>> todasEncuestas = lector.getEncuestas();
-			for (String key : sinAsignar.keySet()) {
-				if(sinAsignar.get(key)){
-					this.numEncuestasSinAsignar++;
+			//Hashtable<String, Boolean> t = lector.getClaves();
+			String salidaError = "";
+			for (String key : t.keySet()) {
+				if(t.get(key)){
 					Solicitud aux = todasEncuestas.get(key).getLeft();
-					salidaError = salidaError + "Linea = " + aux.getNumLinea() + " Profesor = " + aux.getNombre() + " Asignatura = " + aux.getAsignatura() + " Grupo = " + aux.getGrupo() + " Sin asignar\n";
-				}
+					numEncuestasSinAsignar++;
+					salidaError = salidaError + "Linea = " + aux.getNumLinea() + " Profesor = " + aux.getNombre() + " Sin asignar\n";
+				}	    
 			}
+			
 			textSalidaError = salidaError;
 			
-			String salida = "";
-			for(Solicitud sol: p.getSolicitudesAsignadas()){
-				salida = salida + sol.toString() + "\n";
+			numEncuestasAsignadas = tablaSalida.size();
+			
+			FechasOrdenadas f2 = new FechasOrdenadas(tablaSalida, castSemanasSplit);
+			
+			Pair<ArrayList<Solicitud>,Integer> prueba = crearCalendarioPorHoras(f2.list());
+			
+			if(prueba.getRight()==Constantes.ERR_4){
+				return new Triplet<Pair<Boolean, String>, Pair<Boolean, String>,Integer>(new Pair<Boolean, String>(false,""), new Pair<Boolean, String>(false,""),Constantes.ERR_4);
 			}
+			
+			//EscritorExcel excel = new EscritorExcel(prueba, castHorasDouble, castSemanasSplit,ficheroSalida);
+			escritor.EscritorExcel(prueba.getLeft(), castHorasDouble, castSemanasSplit,ficheroSalida);
+			String salida = "";
+			for (Solicitud s : f2.list()) {
+				salida = salida + s.toString() + "\n";
+			}
+
+			//System.out.println(salida);				//Muestra las encuestas asignadas
+
 			txtSalida = salida;
-						
-			escritor.escribir();
-			escritor.EscritorExcel(p.getTablaSalidaExcel(), castHorasDouble, castSemanasSplit,ficheroSalida);			
 			
 			return new Triplet<Pair<Boolean, String>, Pair<Boolean, String>,Integer>(new Pair<Boolean, String>(true, txtSalida),
 					new Pair<Boolean, String>(this.numEncuestasSinAsignar!=0, textSalidaError),0);
@@ -202,6 +239,42 @@ public class Negocio {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	private Pair<ArrayList<Solicitud>,ArrayList<Solicitud>> eliminarSolicitudesRepetidas(ArrayList<Solicitud> fechas){
+		ArrayList<Solicitud> salida = new ArrayList<Solicitud>();
+		ArrayList<Solicitud> salidaRep = new ArrayList<Solicitud>();
+		Solicitud der;
+		
+		for(int i = 0; i < fechas.size(); i++){
+			try{
+				der = fechas.get(i+1);
+			}catch(Exception e){
+				der = null;
+			}
+			if(!solicitudesIguales(fechas.get(i),der)){
+				salida.add(fechas.get(i));
+			}else{
+				salidaRep.add(fechas.get(i));
+			}
+		}
+		
+		return new Pair<ArrayList<Solicitud>,ArrayList<Solicitud>>(salida,salidaRep);
+	}
+
+	private Boolean solicitudesIguales(Solicitud s1, Solicitud s2){
+		if(s2 == null){
+			return false;
+		}else{
+			return 	s1.getNombre().equalsIgnoreCase(s2.getNombre()) &&
+					s1.getAsignatura().equalsIgnoreCase(s2.getAsignatura()) &&
+					s1.getGrupo().equalsIgnoreCase(s2.getGrupo()) &&
+					s1.getCarrera().equalsIgnoreCase(s2.getCarrera()) &&
+					s1.getAula().equalsIgnoreCase(s2.getAula()) &&
+					s1.getDia() == s2.getDia() &&
+					s1.getMes() == s2.getMes() &&
+					s1.getHora() == s2.getHora();
 		}
 	}
 	
@@ -255,4 +328,72 @@ public class Negocio {
 		}
 	}
 	
+	@SuppressWarnings("unused")
+	private ArrayList<ArrayList<Solicitud>> crearCalendario(ArrayList<Solicitud> f){
+		ArrayList<ArrayList<Solicitud>> salida = new ArrayList<ArrayList<Solicitud>>();
+		if(!f.isEmpty()){
+			ArrayList<Solicitud> fechas = f;
+			ArrayList<Solicitud> aux = new ArrayList<Solicitud>();
+			aux.add(fechas.get(0));
+			fechas.remove(0);
+			while(!fechas.isEmpty()){
+				if(fechas.get(0).getDia() == aux.get(0).getDia()){
+					aux.add(fechas.get(0));
+					fechas.remove(0);
+				}else{
+					salida.add(aux);
+					aux = new ArrayList<Solicitud>();
+					aux.add(fechas.get(0));
+					fechas.remove(0);
+				}
+			}
+			salida.add(aux);	
+		}
+		return salida;
+	}
+	
+	private Pair<ArrayList<Solicitud>,Integer> crearCalendarioPorHoras(ArrayList<Solicitud> f){
+		ArrayList<ArrayList<Solicitud>> salida = crearCalendarioPorHorasAux(f);
+		ArrayList<Solicitud> salidaCorrecta = new ArrayList<Solicitud>();
+		
+		try{
+			for(int i = 0; i < salida.size(); i++){
+				if(!salida.get(i).isEmpty()){
+					//System.out.println("HORA = " + salida.get(i).get(0).getHora());
+					for(int j = 0; j < salida.get(i).size(); j++){
+						salidaCorrecta.add(salida.get(i).get(j));
+						//System.out.println(salida.get(i).get(j).getDia());
+					}	
+				}
+			}
+			
+			return new Pair<ArrayList<Solicitud>,Integer>(salidaCorrecta,0);
+		}catch(Exception e){
+			return new Pair<ArrayList<Solicitud>,Integer>(salidaCorrecta,-4);
+		}
+		
+	}
+	
+	private ArrayList<ArrayList<Solicitud>> crearCalendarioPorHorasAux(ArrayList<Solicitud> f){
+		ArrayList<ArrayList<Solicitud>> salida = new ArrayList<ArrayList<Solicitud>>();
+		for(int i = 0; i < castHorasDouble.length; i++){
+			salida.add(i, new ArrayList<Solicitud>());
+		}
+		
+		Boolean ok;
+		while(!f.isEmpty()){
+			ok = false;
+			for(int i = 0; i < salida.size() && !ok; i++){
+				if(f.get(0).getHora() == castHorasDouble[i]){
+					salida.get(i).add(f.get(0));
+					f.remove(0);
+					ok = true;
+					//System.out.println(f.size());
+				}
+			}
+		}	
+		
+		
+		return salida;
+	}
 }
