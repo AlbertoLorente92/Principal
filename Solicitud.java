@@ -65,12 +65,6 @@ public class Solicitud {
 		hora = (double) min + segD;
 	}
 
-	public Boolean esIgualClave(Solicitud s) {
-		if (s == null)
-			return false;
-		return clave().equalsIgnoreCase(s.clave());
-	}
-	
 	public Boolean esIgualQue(Solicitud s) {
 		if (s == null)
 			return false;

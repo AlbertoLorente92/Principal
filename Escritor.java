@@ -15,19 +15,37 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Escritor {
-
+	/**
+	 * solicitudes[0] => Incompletas solicitudes[1] => Erroneas solicitudes[2]
+	 * => Repetidas
+	 */
+	//private ArrayList<ArrayList<Solicitud>> solicitudes = new ArrayList<ArrayList<Solicitud>>();
 	private ArrayList<Solicitud> solicitudesIncompletas = new ArrayList<Solicitud>();
 	
 	private ArrayList<Solicitud> solicitudesIncorrectasP1 = new ArrayList<Solicitud>();
 	private ArrayList<Solicitud> solicitudesIncorrectasP2 = new ArrayList<Solicitud>();
 	private ArrayList<Solicitud> solicitudesIncorrectasP3 = new ArrayList<Solicitud>();
+	
+	private ArrayList<Solicitud> solicitudesRepetidasP1 = new ArrayList<Solicitud>();
+	private ArrayList<Solicitud> solicitudesRepetidasP2 = new ArrayList<Solicitud>();
+	private ArrayList<Solicitud> solicitudesRepetidasP3 = new ArrayList<Solicitud>();
+	/**
+	 * ficheros[0] => Incompletas ficheros[1] => Erroneas ficheros[2] =>
+	 * Repetidas
+	 */
+	private String[] ficheros = new String[3];
 
-	private String[] ficheros = new String[2];
 	public Escritor() {
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
+			//solicitudes.add(i, new ArrayList<Solicitud>());
 			ficheros[i] = "";
 		}
 	}
+
+	/*public void setSolicitudes(ArrayList<ArrayList<Solicitud>> s, String[] f) {
+		solicitudes = s;
+		ficheros = f;
+	}*/
 
 	/**
 	 * I = 0
@@ -53,6 +71,19 @@ public class Escritor {
 		ficheros[1] = f;
 	}
 
+	/**
+	 * I = 2
+	 * 
+	 * @param s
+	 * @param f
+	 */
+	public void setSolicitudesRepetidas(ArrayList<Solicitud> sP1,ArrayList<Solicitud> sP2,ArrayList<Solicitud> sP3, String f) {
+		solicitudesRepetidasP1 = sP1;
+		solicitudesRepetidasP2 = sP2;
+		solicitudesRepetidasP3 = sP3;
+		ficheros[2] = f;
+	}
+
 	public int escribir() {
 		try{  	
     		File file; 
@@ -71,6 +102,9 @@ public class Escritor {
 			escribeAux(true,1,solicitudesIncorrectasP2);
 			escribeAux(true,1,solicitudesIncorrectasP3);
 			
+			escribeAux(false,2,solicitudesRepetidasP1);
+			escribeAux(false,2,solicitudesRepetidasP2);
+			escribeAux(false,2,solicitudesRepetidasP3);
 			return 0;
 		}catch(Exception e){
 			return -5;
@@ -78,7 +112,7 @@ public class Escritor {
 		
 	}
 	
-	public void EscritorExcel(Solicitud[][] salidaExcel,double[] castHorasDouble,ArrayList<Pair<Integer,Integer>> castSemanasSplit,String fichero) {
+	public void EscritorExcel(ArrayList<Solicitud> prueba,double[] castHorasDouble,ArrayList<Pair<Integer,Integer>> castSemanasSplit,String fichero) {
 		try{    		
     		File file = new File(fichero); 	
     		file.delete();   
@@ -107,17 +141,14 @@ public class Escritor {
 			datos[i][0] = aux;
 		}
 		
-		for(int i = 1; i < castHorasDouble.length+1; i++){
-			for(int j = 1; j < castSemanasSplit.size()+1; j++){
-				if(salidaExcel[i-1][j-1] != null){
-					if(!salidaExcel[i-1][j-1].isEmpty() && salidaExcel[i-1][j-1].getDia() == castSemanasSplit.get(j-1).getLeft() &&
-							salidaExcel[i-1][j-1].getHora() == castHorasDouble[i-1]){
-						datos[i][j] = salidaExcel[i-1][j-1].claveProfesor();
-					}else{
-						datos[i][j] = "";
-					}
+		for(int j = 1; j < castHorasDouble.length+1; j++){
+			for(int i = 1; i < castSemanasSplit.size()+1; i++){	
+				if(!prueba.isEmpty() && prueba.get(0).getDia() == castSemanasSplit.get(i-1).getLeft() &&
+					prueba.get(0).getHora() == castHorasDouble[j-1]){
+					datos[j][i] = prueba.get(0).claveProfesor();
+					prueba.remove(0);
 				}else{
-					datos[i][j] = "";
+					datos[j][i] = "";
 				}
 			}
 		}
