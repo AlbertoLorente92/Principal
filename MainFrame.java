@@ -13,7 +13,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -26,15 +25,9 @@ import java.awt.Color;
 
 public class MainFrame extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Negocio negocio;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -233,14 +226,14 @@ public class MainFrame extends JFrame {
 			pw.println(all);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			
 		} finally {
 			try {
 				if (null != fichero) {
 					fichero.close();
 				}
 			} catch (Exception e2) {
-				e2.printStackTrace();
+				
 			}
 		}
 			
@@ -252,55 +245,48 @@ public class MainFrame extends JFrame {
 		try {
 			br = new BufferedReader(new FileReader("utils/config.txt"));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			return false;
 		}
 		try {
 			Constantes.TEXTO_JTXT_DIAS = "";
 			Constantes.TEXTO_JTXT_HORAS = "";
-		    String line = null;
+			String line = null;
 			try {
 				line = br.readLine();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				return false;
 			}
 			int i = 0;
-		    while (line != null) {
-		    	if(!line.equalsIgnoreCase("--dias") && !line.equalsIgnoreCase("--horas")){
-			    	if(i==0){
-			    		Constantes.TEXTO_JTXT_DIAS = Constantes.TEXTO_JTXT_DIAS + line + "\n";
-			    	}else if(i==1){
-			    		Constantes.TEXTO_JTXT_HORAS = Constantes.TEXTO_JTXT_HORAS + line + "\n";
-			    	}
-		    	}else{
-		    		if(line.equalsIgnoreCase("--horas")){
-		    			i++;
-		    		}
-		    	}
-		    	
-		        try {
-					line = br.readLine();
+			while (line != null) {
+				if(!line.equalsIgnoreCase("--dias") && !line.equalsIgnoreCase("--horas")){
+					if(i==0){
+						Constantes.TEXTO_JTXT_DIAS = Constantes.TEXTO_JTXT_DIAS + line + "\n";
+					}else if(i==1){
+						Constantes.TEXTO_JTXT_HORAS = Constantes.TEXTO_JTXT_HORAS + line + "\n";
+						}
+					}else{
+						if(line.equalsIgnoreCase("--horas")){
+			    			i++;
+						}
+			    	}	    	
+			        try {
+						line = br.readLine();
+					} catch (IOException e) {
+						return false;
+					}
+			    }
+			}finally {
+				try {
+					br.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					return false;
 				}
-		    }
-		} finally {
-		    try {
-				br.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				return false;
-			}
 		}
 		return true;
 	}
 	
 	@Override
-	public void paint(Graphics g)
-	{
-		// TODO Auto-generated method stub
+	public void paint(Graphics g){
 		super.paint(g);
 	}
 }

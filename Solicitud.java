@@ -53,7 +53,6 @@ public class Solicitud {
 	}
 
 	private void parseFecha(String s) {
-		//System.out.println(s + " FECHA");
 		String[] fecha = s.split(" ");
 		setMes(Integer.parseInt(fecha[0].split("/")[1]));
 		dia = Integer.parseInt(fecha[0].split("/")[0]);

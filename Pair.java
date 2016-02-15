@@ -9,9 +9,7 @@ public class Pair<L,R> {
 		this.right = right;
 	}
 	
-	public Pair(){
-		
-	}
+	public Pair(){}
 
 	public L getLeft() {
 		return left;
