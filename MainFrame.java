@@ -12,6 +12,10 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -40,9 +44,13 @@ public class MainFrame extends JFrame {
 			}
 		});
 	}
+	
+	private JButton btnCargarFichero;
 
 	public MainFrame() {
 		negocio = new Negocio();
+		
+		cargarDatos();
 		
 		this.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.jpg"));
 
@@ -52,7 +60,7 @@ public class MainFrame extends JFrame {
 		this.setBounds(100, 100, 723, 605);
 		this.setBackground(Color.LIGHT_GRAY);
 		this.setLayout(null);
-
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		JLabel lblDias = new JLabel(Constantes.TEXTO_LBL_DIAS);
 		lblDias.setBounds(36, 98, 217, 14);
 		this.add(lblDias);
@@ -93,26 +101,26 @@ public class MainFrame extends JFrame {
 		//System.out.println(this.getGraphics());
 		//this.getGraphics().drawImage(img,0, 0, 717, 87, this);
 
-		JTextArea txtDias = new JTextArea();
+		final JTextArea txtDias = new JTextArea();
 		txtDias.setText(Constantes.TEXTO_JTXT_DIAS);
 		JScrollPane spaneDias = new JScrollPane(txtDias);
 		spaneDias.setBounds(36, 123, 200, 186);
 		spaneDias.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		this.add(spaneDias);
 
-		JTextArea txtHoras = new JTextArea();
+		final JTextArea txtHoras = new JTextArea();
 		txtHoras.setText(Constantes.TEXTO_JTXT_HORAS);
 		JScrollPane spaneHoras = new JScrollPane(txtHoras);
 		spaneHoras.setBounds(480, 123, 200, 186);
 		spaneHoras.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		this.add(spaneHoras);
 
-		JTextArea txtFichero = new JTextArea();
+		final JTextArea txtFichero = new JTextArea();
 		txtFichero.setText(Constantes.TEXTO_JTXT_FICHERO);
 		txtFichero.setBounds(272, 185, 160, 23);
 		this.add(txtFichero);
 
-		JTextArea txtSalida = new JTextArea();
+		final JTextArea txtSalida = new JTextArea();
 		txtSalida.setEditable(false);
 		txtSalida.setColumns(10);
 		JScrollPane spaneSalida = new JScrollPane(txtSalida);
@@ -120,7 +128,7 @@ public class MainFrame extends JFrame {
 		spaneSalida.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		this.add(spaneSalida);
 
-		JTextArea textSalidaError = new JTextArea();
+		final JTextArea textSalidaError = new JTextArea();
 		textSalidaError.setEditable(false);
 		textSalidaError.setColumns(10);
 		JScrollPane spaneSalidaError = new JScrollPane(textSalidaError);
@@ -138,11 +146,22 @@ public class MainFrame extends JFrame {
 		btnCargarHoras.setFont(boldFont);
 		this.add(btnCargarHoras);
 
-		JButton btnCargarFichero = new JButton(Constantes.TEXTO_BTN_CARGAR_Y_ASIGNAR);
+		btnCargarFichero = new JButton(Constantes.TEXTO_BTN_CARGAR_Y_ASIGNAR);
 		btnCargarFichero.setBounds(272, 225, 160, 80);
 		btnCargarFichero.setFont(boldFont);
 		btnCargarFichero.setEnabled(false);
 		this.add(btnCargarFichero);
+		
+		JButton btnSalir = new JButton(Constantes.TEXTO_BTN_SALIR);
+		btnSalir.setBounds(300, 550, 100, 23);
+		btnSalir.setFont(boldFont);
+		this.add(btnSalir);
+		
+		btnSalir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.exit(0);
+			}
+		});
 
 		btnCargarHoras.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -168,7 +187,6 @@ public class MainFrame extends JFrame {
 					}
 				} else {
 					JOptionPane.showMessageDialog(getContentPane(), Constantes.TEXTO_JOPTIONPANE_DIAS_INCORRECTAS);
-					;
 				}
 			}
 		});
@@ -202,6 +220,55 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
+	}
+	
+	private void cargarDatos(){
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader("config.txt"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			Constantes.TEXTO_JTXT_DIAS = "";
+			Constantes.TEXTO_JTXT_HORAS = "";
+		    String line = null;
+			try {
+				line = br.readLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			int i = 0;
+		    while (line != null) {
+		    	if(!line.equalsIgnoreCase("--dias") && !line.equalsIgnoreCase("--horas")){
+			    	if(i==0){
+			    		Constantes.TEXTO_JTXT_DIAS = Constantes.TEXTO_JTXT_DIAS + line + "\n";
+			    	}else if(i==1){
+			    		Constantes.TEXTO_JTXT_HORAS = Constantes.TEXTO_JTXT_HORAS + line + "\n";
+			    	}
+		    	}else{
+		    		if(line.equalsIgnoreCase("--horas")){
+		    			i++;
+		    		}
+		    	}
+		    	
+		        try {
+					line = br.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    }
+		} finally {
+		    try {
+				br.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	@Override

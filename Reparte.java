@@ -56,7 +56,7 @@ public class Reparte {
 					tablaSalidaExcel[hash.getLeft()][hash.getRight()] = aux;
 					numEncuestasAsignadas++;
 					solicitudesAsignadas.add(aux);
-					asignada.replace(aux.clave(),false);
+					asignada.put(aux.clave(),false);
 				}else{
 					if(aux.esIgualClave(tablaSalidaExcel[hash.getLeft()][hash.getRight()])){
 						solicitudesRepetidas.add(aux);

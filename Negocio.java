@@ -29,6 +29,7 @@ public class Negocio {
 	 */
 	public Pair<Boolean, Boolean> cargarHorasEncuestas(String horas) {
 		try {
+			horas = horas.replace("\n", "").replace("\r", "");
 			String[] horasSplit = horas.split(",");
 			int numHoras = horasSplit.length;
 			castHorasDouble = new double[numHoras];
@@ -59,6 +60,7 @@ public class Negocio {
 	 */
 	public Pair<Boolean, Boolean> cargarDiasEncuestas(String dias) {
 		try {
+			dias = dias.replace("\n", "").replace("\r", "");
 			String[] semanasSplit1 = dias.split(";");
 			int numSemanas = semanasSplit1.length;
 
