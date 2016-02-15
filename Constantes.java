@@ -28,7 +28,7 @@ public class Constantes {
 	public static String TEXTO_SALIDA_ERROR_10 = "Error en la asignacion\nERR10";
 	public static String[] ficheros = {"solicitudesIncompletas.txt","solicitudesErroneas.txt"};
 	
-	
+	public static String TEXTO_JOPTIONPANE_FICHERO = "Fichero config dañado. Volver a descargar por favor";
 	
 	public static int ERR_1 = -1;
 	public static int ERR_2 = -2;

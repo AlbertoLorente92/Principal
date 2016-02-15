@@ -13,9 +13,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -48,11 +51,11 @@ public class MainFrame extends JFrame {
 	private JButton btnCargarFichero;
 
 	public MainFrame() {
+		if(!cargarDatos()){
+			JOptionPane.showMessageDialog(getContentPane(), Constantes.TEXTO_JOPTIONPANE_FICHERO);
+		}
 		negocio = new Negocio();
-		
-		cargarDatos();
-		
-		this.setIconImage(Toolkit.getDefaultToolkit().getImage("icon.jpg"));
+		this.setIconImage(Toolkit.getDefaultToolkit().getImage("utils/icon.jpg"));
 
 		this.setResizable(false);
 		this.setTitle(Constantes.TEXTO_VENTANA);
@@ -93,13 +96,8 @@ public class MainFrame extends JFrame {
 		lblImg.setBounds(0, 0, 717, 87);
 		this.add(lblImg);
 
-		ImageIcon imgThisImg = new ImageIcon("encabezado.jpg");
+		ImageIcon imgThisImg = new ImageIcon("utils/encabezado.jpg");
 		lblImg.setIcon(imgThisImg);
-		//System.out.println(this.getClass().getResource("encabezado.jpg"));
-		//Image img = t.getImage("encabezado.jpg");
-		//System.out.println("imagen expl " + img);
-		//System.out.println(this.getGraphics());
-		//this.getGraphics().drawImage(img,0, 0, 717, 87, this);
 
 		final JTextArea txtDias = new JTextArea();
 		txtDias.setText(Constantes.TEXTO_JTXT_DIAS);
@@ -159,6 +157,7 @@ public class MainFrame extends JFrame {
 		
 		btnSalir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				escribirDatos();
 				System.exit(0);
 			}
 		});
@@ -222,13 +221,39 @@ public class MainFrame extends JFrame {
 		});
 	}
 	
-	private void cargarDatos(){
+	private void escribirDatos(){
+		String all = "--dias\n" + Constantes.TEXTO_JTXT_DIAS + "--horas\n" + Constantes.TEXTO_JTXT_HORAS;
+		FileWriter fichero = null;
+		PrintWriter pw = null;
+				
+		try {
+			fichero = new FileWriter("utils/config.txt");
+			pw = new PrintWriter(fichero);
+
+			pw.println(all);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (null != fichero) {
+					fichero.close();
+				}
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+			
+		
+	}
+	
+	private boolean cargarDatos(){
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader("config.txt"));
+			br = new BufferedReader(new FileReader("utils/config.txt"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		}
 		try {
 			Constantes.TEXTO_JTXT_DIAS = "";
@@ -238,7 +263,7 @@ public class MainFrame extends JFrame {
 				line = br.readLine();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return false;
 			}
 			int i = 0;
 		    while (line != null) {
@@ -258,7 +283,7 @@ public class MainFrame extends JFrame {
 					line = br.readLine();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return false;
 				}
 		    }
 		} finally {
@@ -266,9 +291,10 @@ public class MainFrame extends JFrame {
 				br.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return false;
 			}
 		}
+		return true;
 	}
 	
 	@Override
